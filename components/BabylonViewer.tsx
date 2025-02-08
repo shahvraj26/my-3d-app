@@ -91,7 +91,7 @@ export default function PolycamClone() {
   
     // ✅ Fix: Ensure room.glb loads properly
     setLoading(true);
-    BABYLON.SceneLoader.ImportMesh("", "./room.glb", "", newScene, (meshes) => {
+    BABYLON.SceneLoader.ImportMesh("", "./test.glb", "", newScene, (meshes) => {
       if (meshes.length === 0) {
         console.error("Room model failed to load.");
       } else {
