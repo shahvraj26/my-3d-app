@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/loaders";
-import { Loader2, Plus, Minus } from "lucide-react";
+import { Loader2, Plus, Minus, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from "lucide-react";
 
 export default function PolycamClone() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -17,10 +17,13 @@ export default function PolycamClone() {
     const scene = new BABYLON.Scene(engine);
     setScene(scene);
 
-    const camera = new BABYLON.ArcRotateCamera("camera", Math.PI / 2, Math.PI / 3, 15, new BABYLON.Vector3(0, 2, 0), scene);
+    const camera = new BABYLON.ArcRotateCamera("camera", Math.PI / 2, Math.PI / 3, 15, new BABYLON.Vector3(-100, 200, -100), scene);
+    camera.setPosition(new BABYLON.Vector3(-1000, 250, -1000));
+
     camera.attachControl(canvasRef.current, true);
     setCamera(camera);
 
+    
     const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
     light.intensity = 1.5;
 
@@ -63,13 +66,59 @@ export default function PolycamClone() {
     };
   }, []);
 
+  //Initialize starting camera point
+
+  // Movement Controls
+  const moveCamera = (direction: 'forward' | 'backward' | 'left' | 'right') => {
+    if (!camera) return;
+    
+    const moveDistance = 100; // Adjust this value to change movement distance
+    
+    // Get the camera's forward direction but zero out the Y component to keep movement horizontal
+    const forward = camera.getTarget().subtract(camera.position);
+    forward.y = 100; // This keeps movement parallel to the ground
+    forward.normalize();
+    
+    // Get the right vector (perpendicular to forward)
+    const left = BABYLON.Vector3.Cross(forward, BABYLON.Vector3.Up()).normalize();
+    
+    // Create movement vector based on direction
+    let movement = new BABYLON.Vector3(0, 0, 0);
+  
+    switch (direction) {
+      case 'forward':
+        movement = forward.scale(moveDistance);
+        break;
+      case 'backward':
+        movement = forward.scale(-moveDistance);
+        break;
+      case 'left':
+        movement = left.scale(moveDistance);
+        break;
+      case 'right':
+        movement = left.scale(-moveDistance);
+        break;
+    }
+
+    const originalPositionY = camera.position.y;
+    const originalTargetY = camera.target.y;
+  
+    // Apply movement to both camera position and target
+    camera.position.addInPlace(movement);
+    camera.target.addInPlace(movement);
+
+    // Restore the original Y values to maintain height
+    camera.position.y = 200;
+    camera.target.y = 200;
+  };
+
   // Zoom Controls
   const zoomIn = () => {
-    if (camera) camera.radius -= 100;
+    if (camera) camera.radius -= 300;
   };
 
   const zoomOut = () => {
-    if (camera) camera.radius += 100;
+    if (camera) camera.radius += 300;
   };
 
   // Add Objects (Chairs / Tables)
@@ -117,6 +166,26 @@ export default function PolycamClone() {
         <div className="flex-grow flex items-center justify-center bg-gray-100 relative">
           {loading && <Loader2 className="w-12 h-12 animate-spin text-gray-700" />}
           <canvas ref={canvasRef} className="w-full h-full" />
+          
+          {/* Movement Controls */}
+          <div className="absolute bottom-20 right-4 grid grid-cols-3 gap-2">
+            <div></div>
+            <button onClick={() => moveCamera('forward')} className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-lg">
+              <ArrowUp className="w-5 h-5" />
+            </button>
+            <div></div>
+            <button onClick={() => moveCamera('left')} className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-lg">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <button onClick={() => moveCamera('backward')} className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-lg">
+              <ArrowDown className="w-5 h-5" />
+            </button>
+            <button onClick={() => moveCamera('right')} className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-lg">
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Zoom Controls */}
           <div className="absolute bottom-4 right-4 flex gap-2">
             <button onClick={zoomIn} className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg">
               <Plus className="w-5 h-5" />
