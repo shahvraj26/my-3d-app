@@ -50,9 +50,9 @@ export default function GardensPage() {
   };
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">3D Model Gallery</h1>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Model Gallery</h1>
         <div className="relative">
           <input
             type="file"
@@ -64,11 +64,11 @@ export default function GardensPage() {
           />
           <label
             htmlFor="file-upload"
-            className={`cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg ${
+            className={`cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
               uploading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
-            {uploading ? 'Uploading...' : 'Add Model'}
+            {uploading ? 'Uploading...' : 'Upload Model'}
           </label>
         </div>
       </div>
