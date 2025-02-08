@@ -6,8 +6,8 @@ import Image from "next/image";
 const ModelSelector = () => {
   const router = useRouter();
   const [models] = useState([
-    { name: "EmptyRoom", preview: "/empty-room-preview.jpg" },
-    { name: "room", preview: "/room-preview.jpg" },
+    { name: "EmptyRoom" },
+    { name: "room" },
   ]);
 
   const handleModelClick = (modelName: string) => {
@@ -23,10 +23,12 @@ const ModelSelector = () => {
           className="cursor-pointer group"
         >
           <div className="relative aspect-square overflow-hidden rounded-lg border border-gray-200 hover:border-gray-300 transition-all">
-            <img
-              src={`/api/placeholder/400/400`}
-              alt={model.name}
-              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
+            <Image
+              src={`/previews/${model.name.toLowerCase()}_preview.png`}
+              alt={`${model.name} preview`}
+              width={400}
+              height={400}
+              className="object-cover"
             />
           </div>
           <p className="text-center mt-2 text-gray-700 group-hover:text-gray-900">
