@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 const models = [
-  { name: "Orange Chair", path: "./3d-orangechair-1.glb", position: new BABYLON.Vector3(0, 0, 0) },
-  { name: "Blue Sofa", path: "./3d-armchair.glb", position: new BABYLON.Vector3(2, 0, 0) },
-  { name: "Modern Table", path: "./3d-orangechair.glb", position: new BABYLON.Vector3(-2, 0, 0) },
+  { name: "Orange Chair", path: "./3d-orangechair-1.glb", position: new BABYLON.Vector3(-3, 2, 0) },
+  { name: "Blue Sofa", path: "./3d-armchair.glb", position: new BABYLON.Vector3(3, 3, 2) },
+  { name: "Modern Table", path: "./3d-orangechair.glb", position: new BABYLON.Vector3(0, 4, -3) },
 ];
 
 export default function BabylonViewer() {
@@ -29,13 +29,13 @@ export default function BabylonViewer() {
       Math.PI / 4,
       Math.PI / 3,
       10,
-      new BABYLON.Vector3(0, 1, 0),
+      new BABYLON.Vector3(0, 2, 0),
       scene
     );
     camera.attachControl(canvasRef.current, true);
 
     const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), scene);
-    light.intensity = 1.2;
+    light.intensity = 1.5;
 
     const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 10, height: 10 }, scene);
     ground.receiveShadows = true;
@@ -44,7 +44,7 @@ export default function BabylonViewer() {
     models.forEach((model) => {
       BABYLON.SceneLoader.ImportMesh("", model.path, "", scene, (meshes) => {
         meshes.forEach((mesh) => {
-          mesh.position = model.position;
+          mesh.position = model.position.clone();
           mesh.isPickable = true;
           mesh.actionManager = new BABYLON.ActionManager(scene);
           mesh.actionManager.registerAction(
@@ -58,17 +58,15 @@ export default function BabylonViewer() {
       });
     });
 
-    const handlePointerMove = () => {
-      if (selectedMesh) {
-        const pickInfo = scene.pick(scene.pointerX, scene.pointerY);
-        if (pickInfo.hit && pickInfo.pickedPoint) {
-          selectedMesh.position.x = pickInfo.pickedPoint.x;
-          selectedMesh.position.z = pickInfo.pickedPoint.z;
-        }
+    // Corrected function signature
+    const handlePointerMove = (evt: BABYLON.IPointerEvent, pickInfo: BABYLON.PickingInfo) => {
+      if (selectedMesh && pickInfo.hit && pickInfo.pickedPoint) {
+        selectedMesh.position.x = pickInfo.pickedPoint.x;
+        selectedMesh.position.z = pickInfo.pickedPoint.z;
       }
     };
 
-    scene.onPointerMove = handlePointerMove;
+    scene.onPointerMove = (evt, pickInfo) => handlePointerMove(evt, pickInfo);
     scene.onPointerUp = () => setSelectedMesh(null);
 
     engine.runRenderLoop(() => {
@@ -95,7 +93,10 @@ export default function BabylonViewer() {
             </div>
           )}
           <canvas ref={canvasRef} className="w-full h-[500px] rounded-xl shadow-lg border border-gray-700" />
-          <Button className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-transform hover:scale-105">
+          <Button
+            className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-transform hover:scale-105"
+            onClick={() => window.location.reload()}
+          >
             Reset Scene
           </Button>
         </CardContent>
