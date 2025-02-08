@@ -1,9 +1,14 @@
+"use client";
 import { useRef, useState, useEffect } from "react";
 import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/loaders";
 import { Loader2, Plus, Minus, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from "lucide-react";
 
-export default function PolycamClone() {
+interface BabylonViewerProps {
+  modelName: string;
+}
+
+export default function BabylonViewer({ modelName }: BabylonViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [scene, setScene] = useState<BABYLON.Scene | null>(null);
   const [camera, setCamera] = useState<BABYLON.ArcRotateCamera | null>(null);
@@ -11,30 +16,45 @@ export default function PolycamClone() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !modelName) return;
 
     const engine = new BABYLON.Engine(canvasRef.current, true);
     const scene = new BABYLON.Scene(engine);
     setScene(scene);
 
-    const camera = new BABYLON.ArcRotateCamera("camera", Math.PI / 2, Math.PI / 3, 15, new BABYLON.Vector3(-100, 200, -100), scene);
+    const camera = new BABYLON.ArcRotateCamera(
+      "camera",
+      Math.PI / 2,
+      Math.PI / 3,
+      15,
+      new BABYLON.Vector3(-100, 200, -100),
+      scene
+    );
     camera.setPosition(new BABYLON.Vector3(-1000, 250, -1000));
-
     camera.attachControl(canvasRef.current, true);
     setCamera(camera);
 
-    
-    const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+    const light = new BABYLON.HemisphericLight(
+      "light",
+      new BABYLON.Vector3(0, 1, 0),
+      scene
+    );
     light.intensity = 1.5;
 
-    // Load Room Model
-    BABYLON.SceneLoader.ImportMesh("", "./room.glb", "", scene, (meshes) => {
-      meshes.forEach(mesh => {
-        mesh.position = new BABYLON.Vector3(0, 0, 0);
-        mesh.scaling = new BABYLON.Vector3(1.5, 1.5, 1.5);
-      });
-      setLoading(false);
-    });
+    // Load Model based on the modelName prop
+    BABYLON.SceneLoader.ImportMesh(
+      "",
+      `/models/${modelName}.glb`,
+      "",
+      scene,
+      (meshes) => {
+        meshes.forEach((mesh) => {
+          mesh.position = new BABYLON.Vector3(0, 0, 0);
+          mesh.scaling = new BABYLON.Vector3(1.5, 1.5, 1.5);
+        });
+        setLoading(false);
+      }
+    );
 
     // Enable object dragging
     scene.onPointerDown = (evt, pickInfo) => {
@@ -64,9 +84,7 @@ export default function PolycamClone() {
     return () => {
       engine.dispose();
     };
-  }, []);
-
-  //Initialize starting camera point
+  }, [modelName]); // Add modelName to dependency array
 
   // Movement Controls
   const moveCamera = (direction: 'forward' | 'backward' | 'left' | 'right') => {
